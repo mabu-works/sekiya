@@ -1,0 +1,1 @@
+{"description":"せきや｜席替え・座席シャッフルツール","name":"sekiya","private":true,"scripts":{"test":"node --test tests/*.test.js"},"version":"1.0.0"}
