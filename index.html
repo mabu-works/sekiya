@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>せきや｜席替え・座席シャッフルツール</title>
+<meta name="description" content="名前リストを縦×横の座席表にランダムに配置する席替えツール。前（黒板）の向き指定、結果のコピーつき。">
+<meta name="theme-color" content="#0a0f1c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+try {
+  var savedTheme = localStorage.getItem("sekiya-theme");
+  if (savedTheme === "light" || savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) { /* テーマ保存が使えない環境ではダークを既定にする */ }
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#top">せきや</a>
+    <span class="topbar-links">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">🌙</button>
+    </span>
+  </div>
+</nav>
+
+<header class="site-header" id="top">
+  <div class="wrap">
+    <p class="eyebrow">SEAT SHUFFLE</p>
+    <h1>せきや</h1>
+    <p class="tagline">席替え・座席シャッフルツール</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 💺 座席の設定 -->
+  <section class="card">
+    <h2>座席の設定</h2>
+    <div class="grid-controls">
+      <label for="rowsInput">縦（列の数）</label>
+      <input id="rowsInput" type="number" min="1" max="20" step="1" value="6">
+      <span class="note-inline">行 ×</span>
+      <label for="colsInput">横</label>
+      <input id="colsInput" type="number" min="1" max="20" step="1" value="6">
+      <span class="note-inline">列 ＝ <strong id="seatCount">36</strong>席</span>
+    </div>
+    <div class="front-controls">
+      <span class="front-label" id="frontLabel">前（黒板）の向き</span>
+      <div class="front-options" role="radiogroup" aria-labelledby="frontLabel">
+        <label><input type="radio" name="front" value="top" checked> 上</label>
+        <label><input type="radio" name="front" value="bottom"> 下</label>
+        <label><input type="radio" name="front" value="left"> 左</label>
+        <label><input type="radio" name="front" value="right"> 右</label>
+      </div>
+    </div>
+    <p class="note">縦・横はそれぞれ1〜20で指定してください。結果の座席表では、選んだ向きに「前（黒板）」の帯を表示します。</p>
+    <div class="actions">
+      <button id="expandBtn" class="btn btn-sub" type="button">人数に合わせて座席を広げる</button>
+    </div>
+    <p id="gridMsg" class="note" aria-live="polite"></p>
+  </section>
+
+  <!-- 📝 名前リスト -->
+  <section class="card">
+    <h2>名前リスト（<span id="nameCount">0</span>人）</h2>
+    <textarea id="namesArea" rows="10" placeholder="1行に1人ずつ入力してください（貼り付け対応）&#10;例：&#10;田中&#10;佐藤&#10;鈴木"></textarea>
+    <p class="note">前後の空白は取り除き、空行は無視されます。同名の人がいる場合は、同じ名前をそのまま複数行入れてください。同名は別々の人として扱い、それぞれ別の席に配置します。</p>
+    <p class="note">名前リストと座席の設定（縦・横・前の向き）はこのブラウザに自動保存され、次回開いたときに復元されます。「リストをクリア」を押すと、保存したデータも消えます。</p>
+    <div class="actions">
+      <button id="clearBtn" class="btn btn-sub" type="button">リストをクリア</button>
+      <button id="sampleBtn" class="btn btn-sub" type="button">サンプルを入れる</button>
+    </div>
+  </section>
+
+  <!-- 🗺️ 座席表 -->
+  <section class="card result-card">
+    <h2>座席表</h2>
+    <div id="seatArea" class="seat-area" aria-live="polite">
+      <p class="note seat-empty">名前を入れて「席替えする」を押してね</p>
+    </div>
+    <div class="actions">
+      <button id="shuffleBtn" class="btn btn-primary" type="button">席替えする</button>
+      <button id="reshuffleBtn" class="btn btn-sub" type="button" disabled>もう一度シャッフル</button>
+      <button id="copyResultBtn" class="btn btn-sub" type="button" disabled>結果をコピー</button>
+      <button id="printBtn" class="btn btn-sub" type="button" disabled>座席表を印刷</button>
+    </div>
+    <p id="shuffleMsg" class="note" aria-live="polite"></p>
+    <p id="copyMsg" class="note" aria-live="polite"></p>
+    <p class="note">名前より座席が多い場合、余った席は空席として表示されます。「結果をコピー」は座席表の並び（行・列）を保ったテキストでコピーします。</p>
+  </section>
+
+  <!-- 💡 使い方のヒント -->
+  <section class="card">
+    <h2>使い方のヒント</h2>
+    <p>学校の名簿などをそのまま貼り付けると、そのまま席替えできます。出席番号つきの名前（例：「1 田中」）でもそのまま使えます。同姓同名の人がいる場合は、必要に応じて「田中（A）」のように区別して入力すると、座席表でも見分けられます。</p>
+  </section>
+</main>
+
+<footer class="site-footer wrap">
+  <p>せきや — 入力内容はブラウザ内でのみ処理されます</p>
+</footer>
+
+<script src="js/seat-core.js"></script>
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
